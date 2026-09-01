@@ -1,24 +1,75 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ArrowDown, ArrowUpRight, Facebook, Gamepad2, Instagram, MapPin, Menu, MessageCircle, Sparkles, Swords, Users, X } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import heroImage from "@/assets/spacebox-hero.jpg";
+import { activities, gallery, venue } from "@/data/spacebox";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Space Box | Gaming & Entertainment in La Marsa" },
+      { name: "description", content: "Level up your experience at Space Box, a premium gaming and entertainment destination in La Marsa, Tunisia." },
+      { property: "og:title", content: "Space Box — Level Up Your Experience" },
+      { property: "og:description", content: "Gaming, competition and entertainment — all in one place." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: "/" }],
+  }),
+  component: SpaceBoxPage,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+const nav = ["Home", "Activities", "Experience", "Gallery", "About", "Contact"];
+
+function Navbar() {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll(); window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return <header className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ${scrolled || open ? "border-border bg-background/90 backdrop-blur-xl" : "border-transparent bg-transparent"}`}>
+    <div className="section-shell grid h-20 grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-3 lg:grid-cols-[auto_1fr_auto]">
+      <a href="#home" className="flex min-w-0 items-center gap-3" aria-label="Space Box home"><span className="grid size-9 shrink-0 place-items-center border border-primary/60 bg-primary/10 font-display text-sm font-bold text-primary shadow-[0_0_24px_var(--glow-primary)]">SB</span><span className="truncate font-display text-base font-bold uppercase tracking-[0.14em]">Space Box</span></a>
+      <nav className="hidden items-center justify-center gap-7 lg:flex" aria-label="Primary navigation">{nav.map((item) => <a key={item} href={`#${item.toLowerCase()}`} className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground transition hover:text-foreground">{item}</a>)}</nav>
+      <Button asChild size="lg" variant="hero" className="hidden sm:inline-flex"><a href="#contact">Book / Contact Us</a></Button>
+      <Button variant="glass" size="icon" className="lg:hidden" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-nav" aria-label={open ? "Close menu" : "Open menu"}>{open ? <X /> : <Menu />}</Button>
     </div>
-  );
+    <div id="mobile-nav" className={`overflow-hidden border-t border-border bg-background/95 backdrop-blur-xl transition-all duration-300 lg:hidden ${open ? "max-h-[30rem] opacity-100" : "max-h-0 opacity-0"}`}><nav className="section-shell flex flex-col py-4" aria-label="Mobile navigation">{nav.map((item) => <a key={item} href={`#${item.toLowerCase()}`} onClick={() => setOpen(false)} className="border-b border-border py-3 text-sm font-semibold uppercase tracking-[0.12em]">{item}</a>)}<Button asChild variant="hero" size="lg" className="mt-4 sm:hidden"><a href="#contact" onClick={() => setOpen(false)}>Book / Contact Us</a></Button></nav></div>
+  </header>;
 }
+
+function Hero() { return <section id="home" className="relative flex min-h-[760px] items-end overflow-hidden pt-20 sm:min-h-screen">
+  <img src={heroImage} alt="Atmospheric premium gaming lounge interior" width={1920} height={1280} className="absolute inset-0 size-full object-cover object-[65%_center]" fetchPriority="high" />
+  <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--background)_0%,color-mix(in_oklab,var(--background)_88%,transparent)_38%,color-mix(in_oklab,var(--background)_35%,transparent)_72%),linear-gradient(0deg,var(--background)_0%,transparent_60%)]" />
+  <div className="hero-grid absolute inset-0 opacity-50" /><div className="ambient absolute -left-20 top-1/3 h-48 w-48 rounded-full bg-primary/20 blur-3xl" />
+  <div className="section-shell relative z-10 pb-20 pt-28 sm:pb-24"><p className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.25em] text-electric"><span className="h-px w-10 bg-electric" />La Marsa • Tunisia</p><h1 className="max-w-5xl font-display text-[clamp(3.25rem,9vw,7.8rem)] font-extrabold leading-[0.88] tracking-normal">LEVEL UP<br/><span className="text-outline">YOUR EXPERIENCE.</span></h1><p className="mt-7 max-w-xl text-base leading-7 text-foreground/75 sm:text-lg">Gaming, competition and entertainment — all in one place.</p><div className="mt-9 flex flex-col gap-3 min-[430px]:flex-row"><Button asChild variant="hero" size="lg"><a href="#activities">Discover Space Box <ArrowDown /></a></Button><Button asChild variant="glass" size="lg"><a href="#contact">Contact Us</a></Button></div></div>
+  <a href="#activities" aria-label="Scroll to activities" className="scroll-line absolute bottom-7 right-6 z-10 hidden flex-col items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground sm:flex"><span>Scroll</span><ArrowDown className="size-4" /></a>
+</section>; }
+
+function SectionHeading({ eyebrow, title, copy }: { eyebrow: string; title: string; copy: string }) { return <div className="mb-10 grid gap-5 md:grid-cols-[minmax(0,1.2fr)_minmax(260px,.8fr)] md:items-end"><div><p className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-primary">{eyebrow}</p><h2 className="max-w-3xl text-4xl font-bold leading-none tracking-normal sm:text-5xl lg:text-6xl">{title}</h2></div><p className="max-w-lg text-sm leading-7 text-muted-foreground sm:text-base">{copy}</p></div>; }
+
+function ActivityCard({ item, index }: { item: (typeof activities)[number]; index: number }) { return <article className="group overflow-hidden border border-border bg-card"><div className="aspect-[4/3] overflow-hidden"><img src={item.image} alt={`Editable visual placeholder for ${item.title}`} width={1408} height={1056} loading="lazy" className="size-full object-cover transition duration-700 group-hover:scale-105" /></div><div className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 p-5"><div className="min-w-0"><p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">0{index + 1} / Edit activity</p><h3 className="text-xl font-bold">{item.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p></div><ArrowUpRight className="mt-1 size-5 shrink-0 text-muted-foreground transition group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-primary" /></div></article>; }
+
+function Activities() { return <section id="activities" className="bg-background py-24 sm:py-32"><div className="section-shell"><SectionHeading eyebrow="Activities" title="MORE THAN JUST GAMING." copy="Space Box is an entertainment destination made for playing, friendly competition and quality time with the people you enjoy most."/><div className="grid gap-4 sm:grid-cols-2">{activities.map((item, i) => <ActivityCard key={item.title} item={item} index={i} />)}</div></div></section>; }
+
+function Experience() { const points = [{icon:Sparkles,title:"Immersive Atmosphere"},{icon:Swords,title:"Competitive Energy"},{icon:Users,title:"Perfect for Groups"}]; return <section id="experience" className="border-y border-border bg-surface py-24 sm:py-32"><div className="section-shell grid gap-12 lg:grid-cols-[1.1fr_.9fr] lg:items-center"><div className="relative"><img src={gallery[1].image} alt="Friends enjoying an immersive entertainment experience" width={1408} height={1056} loading="lazy" className="aspect-[5/6] w-full object-cover sm:aspect-[4/3] lg:aspect-[5/6]"/><div className="absolute -bottom-4 -right-2 border border-border bg-background/85 px-5 py-4 backdrop-blur-md sm:-right-5"><span className="text-xs font-bold uppercase tracking-[0.18em] text-electric">Made to be remembered</span></div></div><div><p className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-primary">The experience</p><h2 className="text-4xl font-bold leading-none sm:text-5xl lg:text-6xl">BUILT FOR THE EXPERIENCE.</h2><p className="mt-6 max-w-xl text-base leading-8 text-muted-foreground">Step into a modern environment shaped around immersive play, friendly rivalry and shared moments. Come with your group, bring your energy, and make the experience your own.</p><div className="mt-9 space-y-3">{points.map(({icon:Icon,title}) => <div key={title} className="flex items-center gap-4 border-b border-border py-4"><span className="grid size-10 shrink-0 place-items-center bg-primary/10 text-primary"><Icon className="size-5"/></span><h3 className="text-base font-semibold">{title}</h3></div>)}</div></div></div></section>; }
+
+function Features() { const items=[{n:"01",t:"Play",d:"Switch off from the everyday and step into the moment."},{n:"02",t:"Compete",d:"Bring the energy with friendly, memorable competition."},{n:"03",t:"Connect",d:"Share the experience with friends and your wider circle."},{n:"04",t:"Experience",d:"Enjoy entertainment in an atmosphere built to stand out."}]; return <section className="py-24 sm:py-32"><div className="section-shell"><SectionHeading eyebrow="Why Space Box" title="YOUR SPACE TO PLAY." copy="Four simple reasons to come together, stay longer and make every visit feel different."/><div className="grid border-l border-t border-border sm:grid-cols-2 lg:grid-cols-4">{items.map(x=><div key={x.t} className="min-h-64 border-b border-r border-border p-6 transition hover:bg-card"><span className="font-display text-xs text-primary">{x.n}</span><h3 className="mt-20 text-3xl font-bold">{x.t}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{x.d}</p></div>)}</div></div></section>; }
+
+function Gallery() { return <section id="gallery" className="bg-surface py-24 sm:py-32"><div className="section-shell"><SectionHeading eyebrow="Inside the experience" title="THE SPACE. THE ENERGY." copy="A glimpse into the atmosphere, competition and shared entertainment that define Space Box."/><div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-4 sm:mx-0 sm:grid sm:grid-cols-12 sm:overflow-visible sm:px-0">{gallery.map((item,i)=><figure key={item.title} className={`group relative aspect-[4/5] min-w-[82vw] snap-center overflow-hidden sm:min-w-0 ${i===0||i===3?"sm:col-span-7":"sm:col-span-5"}`}><img src={item.image} alt={`${item.title} — ${item.category} at a gaming venue`} width={1408} height={1056} loading="lazy" className="size-full object-cover transition duration-700 group-hover:scale-105"/><div className="absolute inset-0 bg-[linear-gradient(0deg,var(--background)_0%,transparent_55%)] opacity-85"/><figcaption className="absolute inset-x-0 bottom-0 p-6"><span className="text-[10px] font-bold uppercase tracking-[0.2em] text-electric">{item.category}</span><h3 className="mt-1 text-2xl font-bold">{item.title}</h3></figcaption></figure>)}</div></div></section>; }
+
+function About() { return <section id="about" className="py-24 sm:py-32"><div className="section-shell grid gap-10 lg:grid-cols-2 lg:gap-20"><div><p className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-primary">About Space Box</p><h2 className="text-4xl font-bold leading-none sm:text-5xl">WHERE PLAY BECOMES AN EXPERIENCE.</h2></div><div className="space-y-5 text-base leading-8 text-muted-foreground"><p>Space Box is a gaming and entertainment destination in La Marsa — a place designed for friends to meet, compete and enjoy immersive moments together.</p><p>Whether you arrive for the energy of competition or simply to share a memorable time, the experience is yours to shape.</p></div></div></section>; }
+
+function Visit() { return <section className="border-y border-border bg-card py-24 sm:py-32"><div className="section-shell"><SectionHeading eyebrow="Come visit us" title="MEET US IN LA MARSA." copy="Planning a visit? Verified location, contact and opening information will be added here before launch."/><div className="grid gap-px overflow-hidden border border-border bg-border lg:grid-cols-[1.25fr_.75fr]"><div className="grid min-h-80 place-items-center bg-surface bg-[radial-gradient(circle_at_center,var(--glow-primary),transparent_55%)] p-8 text-center"><div><MapPin className="mx-auto mb-4 size-8 text-primary"/><p className="font-display text-xl font-semibold">Google Maps embed</p><p className="mt-2 text-xs uppercase tracking-[0.16em] text-muted-foreground">Map location to be confirmed</p></div></div><div className="space-y-7 bg-background p-7 sm:p-10"><Info label="Location" value={venue.location}/><Info label="Contact" value={`${venue.phone} · ${venue.email}`}/><Info label="Opening hours" value={venue.hours}/><Button asChild variant="hero" size="lg" className="w-full"><a href="#contact">Plan Your Visit</a></Button></div></div></div></section>; }
+function Info({label,value}:{label:string;value:string}) { return <div><p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-primary">{label}</p><p className="break-words text-sm font-medium text-foreground">{value}</p></div>; }
+
+function Contact() { const submit=(e:FormEvent)=>e.preventDefault(); return <section id="contact" className="py-24 sm:py-32"><div className="section-shell grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:gap-20"><div><p className="mb-4 text-xs font-bold uppercase tracking-[0.22em] text-primary">Contact</p><h2 className="text-4xl font-bold leading-none sm:text-5xl">LET'S PLAN YOUR VISIT.</h2><p className="mt-5 text-sm leading-7 text-muted-foreground">Send Space Box a message. Contact details and form delivery will be connected once verified.</p><Button variant="glass" size="lg" className="mt-8 w-full sm:w-auto" disabled title="WhatsApp number to be added"><MessageCircle/> Chat on WhatsApp</Button></div><form onSubmit={submit} className="grid gap-5 sm:grid-cols-2"><Field label="Name" type="text"/><Field label="Phone" type="tel"/><Field label="Email" type="email"/><label className="sm:col-span-2"><span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Message</span><textarea required rows={5} className="w-full resize-none border border-input bg-card px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary" placeholder="Tell us how we can help"/></label><Button type="submit" variant="hero" size="lg" className="sm:col-span-2 sm:justify-self-start">Send Message <ArrowUpRight/></Button></form></div></section>; }
+function Field({label,type}:{label:string;type:string}) { return <label><span className="mb-2 block text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</span><input required type={type} className="h-12 w-full border border-input bg-card px-4 text-sm outline-none transition focus:border-primary focus:ring-1 focus:ring-primary" placeholder={`Your ${label.toLowerCase()}`}/></label>; }
+
+function Footer() { return <footer className="border-t border-border bg-surface"><div className="section-shell grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr]"><div><div className="flex items-center gap-3"><span className="grid size-10 place-items-center border border-primary/60 bg-primary/10 font-display text-sm font-bold text-primary">SB</span><span className="font-display font-bold uppercase tracking-[0.14em]">Space Box</span></div><p className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground">Gaming, competition and entertainment — all in one place.</p></div><div><p className="mb-4 text-xs font-bold uppercase tracking-[0.16em]">Navigate</p><div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">{nav.slice(1).map(x=><a key={x} href={`#${x.toLowerCase()}`} className="hover:text-foreground">{x}</a>)}</div></div><div><p className="mb-4 text-xs font-bold uppercase tracking-[0.16em]">Connect</p><p className="text-sm text-muted-foreground">{venue.location}</p><div className="mt-5 flex gap-2"><Social label="Instagram"><Instagram/></Social><Social label="Facebook"><Facebook/></Social><Social label="TikTok"><span className="font-display text-sm font-bold">Tk</span></Social></div></div></div><div className="border-t border-border"><div className="section-shell flex flex-col gap-2 py-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between"><p>© 2026 Space Box. All rights reserved.</p><p>La Marsa • Tunisia</p></div></div></footer>; }
+function Social({label,children}:{label:string;children:React.ReactNode}) { return <span aria-label={`${label} link unavailable until verified`} title={`${label} link to be added`} className="grid size-10 cursor-not-allowed place-items-center border border-border text-muted-foreground [&_svg]:size-4">{children}</span>; }
+
+function SpaceBoxPage() { return <><Navbar/><main><Hero/><Activities/><Experience/><Features/><Gallery/><About/><Visit/><Contact/></main><Footer/></>; }
